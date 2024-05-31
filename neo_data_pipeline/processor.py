@@ -26,9 +26,8 @@ class Processor:
 
     @staticmethod
     def standardize_date(epoch_approach):
-        return (
-            datetime.utcfromtimestamp(float(epoch_approach) / 1000).date().isoformat()
-        )
+        # changing the next line to introduce an error
+        return datetime.utcfromtimestamp(epoch_approach).date().isoformat()
 
     def process(self, neo_data):
         for idx, date_array in neo_data.items():
