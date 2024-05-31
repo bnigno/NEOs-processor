@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from neo_data_pipeline.api_client import NasaNeoApiClient
 from neo_data_pipeline.csv_writer import CsvWriter
+from neo_data_pipeline.pipeline import DataPipeline
 from neo_data_pipeline.processor import Processor
 
 
@@ -35,6 +36,5 @@ if __name__ == "__main__":
     processor = Processor()
     csv_writer = CsvWriter()
 
-    neo_data = api_client.fetch_neo_data(start_date, end_date)
-    processed_data = processor.process(neo_data)
-    csv_writer.save_to_csv(processed_data, "neo_data.csv")
+    pipeline = DataPipeline(api_client, processor, csv_writer)
+    pipeline.run(start_date, end_date, "neo_data.csv")
