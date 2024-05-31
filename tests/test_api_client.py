@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
+from requests.exceptions import RequestException
+
 from neo_data_pipeline.api_client import NasaNeoApiClient
 
 
@@ -25,13 +27,9 @@ class TestNasaNeoApiClient(unittest.TestCase):
             },
         )
 
-    @patch("neo_data_pipeline.api_client.requests.get")
-    def test_fetch_neo_data_failure(self, mock_get):
-        mock_get.side_effect = Exception("API Error")
-
-        client = NasaNeoApiClient("test_key")
-
-        with self.assertRaises(Exception):
+    def test_fetch_neo_data_failure(self):
+        client = NasaNeoApiClient("invalid_key")
+        with self.assertRaises(RequestException):
             client.fetch_neo_data("2024-05-01", "2024-05-07")
 
 
