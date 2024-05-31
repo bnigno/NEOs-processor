@@ -2,6 +2,7 @@ import sys
 from datetime import datetime, timedelta
 
 from neo_data_pipeline.api_client import NasaNeoApiClient
+from neo_data_pipeline.processor import Processor
 
 
 def validate_dates(start_date, end_date):
@@ -30,5 +31,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     api_client = NasaNeoApiClient(api_key)
+    processor = Processor()
     neo_data = api_client.fetch_neo_data(start_date, end_date)
-    print(neo_data)
+    processed_data = processor.process(neo_data)
+    for data in processed_data:
+        print(data)
