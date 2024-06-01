@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 
@@ -30,28 +31,65 @@ class Processor:
             datetime.utcfromtimestamp(float(epoch_approach) / 1000).date().isoformat()
         )
 
-    def process(self, neo_data):
-        for idx, date_array in neo_data.items():
-            for item in date_array:
-                name = item["name"]
-                approach_data = item["close_approach_data"][0]
-                approach_date = self.standardize_date(
-                    approach_data["epoch_date_close_approach"]
+    def process(self, neo_data, api_client):
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_neo = {
+                executor.submit(api_client.fetch_neo_orbit_type, neo["id"]): neo
+                for date in neo_data
+                for neo in neo_data[date]
+            }
+            for future in future_to_neo:
+                neo = future_to_neo[future]
+                name = neo.get("name")
+                approach_data = (
+                    neo.get("close_approach_data")[0]
+                    if neo.get("close_approach_data")
+                    else None
                 )
-                diameter_min = item["estimated_diameter"]["kilometers"][
-                    "estimated_diameter_min"
-                ]
-                diameter_max = item["estimated_diameter"]["kilometers"][
-                    "estimated_diameter_max"
-                ]
-                speed_kmh = float(
-                    approach_data["relative_velocity"]["kilometers_per_hour"]
+
+                if approach_data:
+                    approach_date = self.standardize_date(
+                        approach_data.get("epoch_date_close_approach")
+                    )
+                    speed_kmh = (
+                        float(
+                            approach_data.get("relative_velocity", {}).get(
+                                "kilometers_per_hour", 0
+                            )
+                        )
+                        or None
+                    )
+                    distance = (
+                        float(
+                            approach_data.get("miss_distance", {}).get("kilometers", 0)
+                        )
+                        or None
+                    )
+                else:
+                    approach_date = None
+                    speed_kmh = None
+                    distance = None
+
+                diameter_min = (
+                    neo.get("estimated_diameter", {})
+                    .get("kilometers", {})
+                    .get("estimated_diameter_min")
                 )
-                speed_ms = self.convert_kmh_to_ms(speed_kmh)
-                distance = float(approach_data["miss_distance"]["kilometers"])
-                hazardous = item["is_potentially_hazardous_asteroid"]
-                diameter_category = self.categorize_diameter(diameter_max)
-                proximity_category = self.categorize_proximity(distance)
+                diameter_max = (
+                    neo.get("estimated_diameter", {})
+                    .get("kilometers", {})
+                    .get("estimated_diameter_max")
+                )
+
+                speed_ms = self.convert_kmh_to_ms(speed_kmh) if speed_kmh else None
+                hazardous = neo.get("is_potentially_hazardous_asteroid")
+                diameter_category = (
+                    self.categorize_diameter(diameter_max) if diameter_max else None
+                )
+                proximity_category = (
+                    self.categorize_proximity(distance) if distance else None
+                )
+                orbit_type = future.result()
 
                 yield {
                     "Nome": name,
@@ -63,4 +101,5 @@ class Processor:
                     "Categoria Diâmetro": diameter_category,
                     "Categoria Proximidade": proximity_category,
                     "Potencialmente Perigoso": hazardous,
+                    "Tipo de Órbita": orbit_type,
                 }
