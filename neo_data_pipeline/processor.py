@@ -92,6 +92,7 @@ class Processor:
                 orbit_type = future.result()
 
                 yield {
+                    "Id": neo.get("id"),
                     "Nome": name,
                     "Data de Aproximação": approach_date,
                     "Diâmetro Mínimo (km)": diameter_min,

@@ -10,6 +10,7 @@ class TestCsvWriter(unittest.TestCase):
         self.csv_writer = CsvWriter()
         self.test_data = [
             {
+                "Id": 1,
                 "Nome": "Test NEO",
                 "Data de Aproximação": "2024-05-01",
                 "Diâmetro Mínimo (km)": 0.1,
@@ -23,6 +24,7 @@ class TestCsvWriter(unittest.TestCase):
             }
         ]
         self.fieldnames = [
+            "Id",
             "Nome",
             "Data de Aproximação",
             "Diâmetro Mínimo (km)",
