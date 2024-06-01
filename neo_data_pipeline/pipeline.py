@@ -30,6 +30,7 @@ class DataPipeline:
         self.data_processor = Processor()
         self.csv_writer = CsvWriter()
         self.fieldnames = [
+            "Id",
             "Nome",
             "Data de Aproximação",
             "Diâmetro Mínimo (km)",
