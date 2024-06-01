@@ -34,6 +34,34 @@ class TestNasaNeoApiClient(unittest.TestCase):
         with self.assertRaises(RequestException):
             client.fetch_neo_data("2024-05-01", "2024-05-07")
 
+    @patch("neo_data_pipeline.api_client.requests.get")
+    def test_fetch_neo_orbit_type_success(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "orbital_data": {"orbit_class": {"orbit_class_type": "Orbit Type"}}
+        }
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        client = NasaNeoApiClient("test_key")
+        neo_id = 1
+        orbit_data = client.fetch_neo_orbit_type(neo_id)
+
+        self.assertEqual("Orbit Type", orbit_data)
+        mock_get.assert_called_once_with(
+            f"https://api.nasa.gov/neo/rest/v1/neo/{neo_id}",
+            params={
+                "api_key": "test_key",
+            },
+        )
+
+    @patch("neo_data_pipeline.api_client.requests.get")
+    def test_fetch_neo_orbit_type_failure(self, mock_get):
+        mock_get.side_effect = RequestException()
+        client = NasaNeoApiClient("invalid_key")
+        with self.assertRaises(RequestException):
+            client.fetch_neo_orbit_type(1)
+
 
 if __name__ == "__main__":
     unittest.main()
