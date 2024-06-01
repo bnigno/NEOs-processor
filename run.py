@@ -1,21 +1,6 @@
 import sys
-from datetime import datetime, timedelta
 
-from neo_data_pipeline.api_client import NasaNeoApiClient
-from neo_data_pipeline.csv_writer import CsvWriter
 from neo_data_pipeline.pipeline import DataPipeline
-from neo_data_pipeline.processor import Processor
-
-
-def validate_dates(start_date, end_date):
-    start = datetime.strptime(start_date, "%Y-%m-%d")
-    end = datetime.strptime(end_date, "%Y-%m-%d")
-    if end - start > timedelta(days=7):
-        raise ValueError(
-            "The period between start_date and end_date must be no more than 7 days."
-        )
-    return start_date, end_date
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
@@ -26,15 +11,5 @@ if __name__ == "__main__":
     start_date = sys.argv[2]
     end_date = sys.argv[3]
 
-    try:
-        start_date, end_date = validate_dates(start_date, end_date)
-    except ValueError as e:
-        print(e)
-        sys.exit(1)
-
-    api_client = NasaNeoApiClient(api_key)
-    processor = Processor()
-    csv_writer = CsvWriter()
-
-    pipeline = DataPipeline(api_client, processor, csv_writer)
-    pipeline.run(start_date, end_date, "neo_data.csv")
+    pipeline = DataPipeline(api_key)
+    pipeline.run(start_date, end_date)
