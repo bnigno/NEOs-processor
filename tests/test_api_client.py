@@ -27,7 +27,9 @@ class TestNasaNeoApiClient(unittest.TestCase):
             },
         )
 
-    def test_fetch_neo_data_failure(self):
+    @patch("neo_data_pipeline.api_client.requests.get")
+    def test_fetch_neo_data_failure(self, mock_get):
+        mock_get.side_effect = RequestException()
         client = NasaNeoApiClient("invalid_key")
         with self.assertRaises(RequestException):
             client.fetch_neo_data("2024-05-01", "2024-05-07")

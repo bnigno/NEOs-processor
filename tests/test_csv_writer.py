@@ -19,7 +19,20 @@ class TestCsvWriter(unittest.TestCase):
                 "Categoria Diâmetro": "Médio",
                 "Categoria Proximidade": "Próximo",
                 "Potencialmente Perigoso": False,
+                "Tipo de Órbita": "APO",
             }
+        ]
+        self.fieldnames = [
+            "Nome",
+            "Data de Aproximação",
+            "Diâmetro Mínimo (km)",
+            "Diâmetro Máximo (km)",
+            "Velocidade (m/s)",
+            "Distância da Terra (km)",
+            "Categoria Diâmetro",
+            "Categoria Proximidade",
+            "Potencialmente Perigoso",
+            "Tipo de Órbita",
         ]
         self.test_file = "test_neo_data.csv"
 
@@ -28,7 +41,7 @@ class TestCsvWriter(unittest.TestCase):
             os.remove(self.test_file)
 
     def test_save_to_csv(self):
-        self.csv_writer.save_to_csv(self.test_data, self.test_file)
+        self.csv_writer.save_to_csv(self.test_data, self.fieldnames, self.test_file)
         self.assertTrue(os.path.exists(self.test_file))
 
         with open(self.test_file, "r") as file:
