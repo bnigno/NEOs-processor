@@ -1,5 +1,3 @@
-# Technical Challenge - Objective
-
 It is a Python project designed to fetch, process, and store data about Near Earth Objects (NEOs) from NASA's public
 API. The processed data is saved into a CSV file.
 
